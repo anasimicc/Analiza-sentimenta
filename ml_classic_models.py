@@ -1,15 +1,11 @@
 # -*- coding: utf-8 -*-
-"""
-Created on Sun Aug 31 14:34:59 2025
 
-@author: simic
-"""
 
 # first part of the project
 # - Load dataset
 # - Preprocess (cleaning, token filtering)
 # - EDA (class distribution, length histograms, top words per class)
-# - Train classical models (LogReg, MultinomialNB, LinearSVC)
+# - Train classical models (LogReg, MultinomialNB, LinearSVC etc.)
 # - Light hyperparameter search (GridSearchCV) with safe defaults
 # - Evaluate and save models & artifacts
 
@@ -27,7 +23,7 @@ import matplotlib.pyplot as plt
 
 from sklearn.model_selection import train_test_split, GridSearchCV, cross_val_score
 from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer, ENGLISH_STOP_WORDS
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LogisticRegression, SGDClassifier
 from sklearn.naive_bayes import MultinomialNB
 from sklearn.svm import LinearSVC
 from sklearn.pipeline import Pipeline
@@ -64,10 +60,23 @@ def remove_stopwords_and_short(tokens):
     stopwords = ENGLISH_STOP_WORDS
     return [t for t in tokens if t not in stopwords and len(t) > 1]
 
+# Alternative preprocessing version:
+# keep important negation words because they matter a lot for sentiment
+# examples: "not good", "no fun", "never again"
+def remove_stopwords_and_short_keep_negation(tokens):
+    stopwords = ENGLISH_STOP_WORDS - {'no', 'nor', 'not', 'never'}
+    return [t for t in tokens if t not in stopwords and len(t) > 1]
+
 def preprocess_series(series):
     cleaned = series.fillna("").map(clean_text)
     tokenized = cleaned.map(lambda s: s.split())
+
+    # Original version:
     filtered = tokenized.map(remove_stopwords_and_short)
+
+    # Alternative version for sentiment tasks:
+    # filtered = tokenized.map(remove_stopwords_and_short_keep_negation)
+
     return filtered.map(lambda tokens: " ".join(tokens))
 
 # %% Load and preprocess
@@ -118,9 +127,26 @@ plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, "hist_len_clean.png"))
 plt.show()
 
+# Added: average cleaned review length by class
+avg_len_by_class = df.groupby('sentiment')['review_len_clean'].mean()
+print("\nAverage cleaned review length by class:\n", avg_len_by_class)
+avg_len_by_class.to_csv(os.path.join(OUTPUT_DIR, "avg_review_len_by_class.csv"), header=['avg_review_len_clean'])
+
 # Top words per class (CountVectorizer with limited feature size for speed)
 def top_n_words_for_class(df, label, n=25, max_features=5000):
     vect = CountVectorizer(max_features=max_features)
+    texts = df[df['sentiment'] == label]['clean_review']
+    X = vect.fit_transform(texts)
+    sums = np.array(X.sum(axis=0)).ravel()
+    idx = np.argsort(sums)[::-1][:n]
+    features = np.array(vect.get_feature_names_out())[idx]
+    counts = sums[idx]
+    return list(zip(features, counts))
+
+# Added: top bigrams per class
+# This is useful for sentiment because phrases such as "very good" and "not worth" carry more meaning.
+def top_n_bigrams_for_class(df, label, n=20, max_features=5000):
+    vect = CountVectorizer(max_features=max_features, ngram_range=(2, 2))
     texts = df[df['sentiment'] == label]['clean_review']
     X = vect.fit_transform(texts)
     sums = np.array(X.sum(axis=0)).ravel()
@@ -138,6 +164,14 @@ print("\nTop negative words:", top_neg)
 pd.DataFrame(top_pos, columns=["word", "count"]).to_csv(os.path.join(OUTPUT_DIR, "top_positive_words.csv"), index=False)
 pd.DataFrame(top_neg, columns=["word", "count"]).to_csv(os.path.join(OUTPUT_DIR, "top_negative_words.csv"), index=False)
 
+top_pos_bigrams = top_n_bigrams_for_class(df, 'positive', n=20)
+top_neg_bigrams = top_n_bigrams_for_class(df, 'negative', n=20)
+print("\nTop positive bigrams:", top_pos_bigrams)
+print("\nTop negative bigrams:", top_neg_bigrams)
+
+pd.DataFrame(top_pos_bigrams, columns=["bigram", "count"]).to_csv(os.path.join(OUTPUT_DIR, "top_positive_bigrams.csv"), index=False)
+pd.DataFrame(top_neg_bigrams, columns=["bigram", "count"]).to_csv(os.path.join(OUTPUT_DIR, "top_negative_bigrams.csv"), index=False)
+
 # %% Modeling
 
 # Labels: positive -> 1, negative -> 0
@@ -150,16 +184,22 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.20,
 print("\nTrain size:", X_train.shape[0], "Test size:", X_test.shape[0])
 
 # TF-IDF vectorizer (safe defaults)
-tfidf = TfidfVectorizer(max_features=20000, ngram_range=(1,2), min_df=5)
+# Original version:
+# tfidf = TfidfVectorizer(max_features=20000, ngram_range=(1,2), min_df=5)
+
+# Alternative version to test:
+tfidf = TfidfVectorizer(max_features=20000, ngram_range=(1,2), min_df=2, max_df=0.9, sublinear_tf=True)
 
 # Helper evaluation function
 def evaluate(pipeline, X_test, y_test, name):
     preds = pipeline.predict(X_test)
     acc = metrics.accuracy_score(y_test, preds)
+    f1 = metrics.f1_score(y_test, preds)
     report = metrics.classification_report(y_test, preds, target_names=['negative','positive'])
     cm = metrics.confusion_matrix(y_test, preds)
     print(f"\n--- {name} ---")
     print("Accuracy:", acc)
+    print("F1 score:", f1)
     print(report)
     print("Confusion matrix:\n", cm)
 
@@ -208,21 +248,45 @@ print("\nTraining LinearSVC...")
 pipe_svc.fit(X_train, y_train)
 evaluate(pipe_svc, X_test, y_test, "LinearSVC")
 
+# Added bonus model: SGDClassifier
+# Keep it optional if your professor strictly wants only 3 classical models in the main comparison.
+pipe_sgd = Pipeline([
+    ('tfidf', tfidf),
+    ('clf', SGDClassifier(loss='hinge', max_iter=2000, random_state=RANDOM_STATE))
+])
+print("\nTraining SGDClassifier...")
+pipe_sgd.fit(X_train, y_train)
+evaluate(pipe_sgd, X_test, y_test, "SGDClassifier")
+
 # Cross-validation on train set (quick)
 print("\nCross-val accuracy (5-fold) on training data:")
-for name, model in [("LogReg", pipe_lr), ("NaiveBayes", pipe_nb), ("LinearSVC", pipe_svc)]:
+for name, model in [("LogReg", pipe_lr), ("NaiveBayes", pipe_nb), ("LinearSVC", pipe_svc), ("SGDClassifier", pipe_sgd)]:
     scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy', n_jobs=-1)
+    print(f"{name}: mean={scores.mean():.4f}, std={scores.std():.4f}")
+
+print("\nCross-val F1 (5-fold) on training data:")
+for name, model in [("LogReg", pipe_lr), ("NaiveBayes", pipe_nb), ("LinearSVC", pipe_svc), ("SGDClassifier", pipe_sgd)]:
+    scores = cross_val_score(model, X_train, y_train, cv=5, scoring='f1', n_jobs=-1)
     print(f"{name}: mean={scores.mean():.4f}, std={scores.std():.4f}")
 
 # ---------- Light Grid Search (fast) ----------
 # Use smaller TF-IDF for speed during grid search
-tfidf_grid = TfidfVectorizer(max_features=10000, ngram_range=(1,2), min_df=5)
+# Original version:
+# tfidf_grid = TfidfVectorizer(max_features=10000, ngram_range=(1,2), min_df=5)
+
+# Alternative version to test:
+tfidf_grid = TfidfVectorizer(max_features=10000, ngram_range=(1,2), min_df=2, max_df=0.9, sublinear_tf=True)
 
 pipe_lr_gs = Pipeline([('tfidf', tfidf_grid), ('clf', LogisticRegression(max_iter=1000, solver='liblinear', random_state=RANDOM_STATE))])
 pipe_svc_gs = Pipeline([('tfidf', tfidf_grid), ('clf', LinearSVC(max_iter=2000, random_state=RANDOM_STATE))])
 
-param_grid_lr = {'clf__C': [0.1, 1.0, 5.0]}
-param_grid_svc = {'clf__C': [0.1, 1.0, 5.0]}
+# Original version:
+# param_grid_lr = {'clf__C': [0.1, 1.0, 5.0]}
+# param_grid_svc = {'clf__C': [0.1, 1.0, 5.0]}
+
+# Alternative version to test:
+param_grid_lr = {'clf__C': [0.01, 0.1, 1.0, 10.0]}
+param_grid_svc = {'clf__C': [0.01, 0.1, 1.0, 10.0]}
 
 print("\nRunning small GridSearchCV for LogisticRegression (cv=3)...")
 gs_lr = GridSearchCV(pipe_lr_gs, param_grid_lr, cv=3, scoring='f1', n_jobs=-1, verbose=1)
@@ -245,6 +309,7 @@ models = {
     "pipe_lr_baseline": pipe_lr,
     "pipe_nb": pipe_nb,
     "pipe_svc": pipe_svc,
+    "pipe_sgd": pipe_sgd,
     "best_lr": best_lr,
     "best_svc": best_svc
 }
@@ -257,9 +322,10 @@ for name, model in models.items():
 # Save summarized results to CSV
 results = []
 for name, est in [("LogReg_baseline", pipe_lr), ("NB", pipe_nb), ("SVC", pipe_svc),
-                  ("LogReg_best", best_lr), ("SVC_best", best_svc)]:
+                  ("SGD", pipe_sgd), ("LogReg_best", best_lr), ("SVC_best", best_svc)]:
     preds = est.predict(X_test)
     acc = metrics.accuracy_score(y_test, preds)
+    f1 = metrics.f1_score(y_test, preds)
     try:
         y_score = est.predict_proba(X_test)[:,1]
         auc = metrics.roc_auc_score(y_test, y_score)
@@ -269,7 +335,7 @@ for name, est in [("LogReg_baseline", pipe_lr), ("NB", pipe_nb), ("SVC", pipe_sv
             auc = metrics.roc_auc_score(y_test, y_score)
         except Exception:
             auc = np.nan
-    results.append({"model": name, "accuracy": acc, "roc_auc": auc})
+    results.append({"model": name, "accuracy": acc, "f1": f1, "roc_auc": auc})
 results_df = pd.DataFrame(results)
 results_df.to_csv(os.path.join(OUTPUT_DIR, "model_summary.csv"), index=False)
 
@@ -280,10 +346,25 @@ def save_misclassified(estimator, X_test, y_test, name, n=200):
     mis = pd.DataFrame({"text": X_test[mask], "true": y_test[mask], "pred": preds[mask]})
     mis = mis.sample(min(len(mis), n), random_state=RANDOM_STATE)
     mis.to_csv(os.path.join(OUTPUT_DIR, f"misclassified_{name}.csv"), index=False)
+    return mis
 
-save_misclassified(pipe_lr, X_test, y_test, "LogReg_baseline", n=300)
-save_misclassified(pipe_nb, X_test, y_test, "NaiveBayes", n=300)
-save_misclassified(pipe_svc, X_test, y_test, "LinearSVC", n=300)
+mis_lr = save_misclassified(pipe_lr, X_test, y_test, "LogReg_baseline", n=300)
+mis_nb = save_misclassified(pipe_nb, X_test, y_test, "NaiveBayes", n=300)
+mis_svc = save_misclassified(pipe_svc, X_test, y_test, "LinearSVC", n=300)
+mis_sgd = save_misclassified(pipe_sgd, X_test, y_test, "SGDClassifier", n=300)
+
+# Added: print a few examples directly in console for quick error inspection
+print("\nSample misclassified examples - Logistic Regression:")
+print(mis_lr.head(10))
+
+print("\nSample misclassified examples - Naive Bayes:")
+print(mis_nb.head(10))
+
+print("\nSample misclassified examples - LinearSVC:")
+print(mis_svc.head(10))
+
+print("\nSample misclassified examples - SGDClassifier:")
+print(mis_sgd.head(10))
 
 print("\nStudent 1 workflow finished. Artifacts saved in:", OUTPUT_DIR)
 print("Files created (examples):", os.listdir(OUTPUT_DIR)[:20])

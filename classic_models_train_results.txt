@@ -1,0 +1,146 @@
+Train size: 40000 Test size: 10000
+
+Training LogisticRegression (baseline)...
+
+--- LogisticRegression_baseline ---
+Accuracy: 0.9046
+F1 score: 0.9056379821958457
+              precision    recall  f1-score   support
+
+    negative       0.91      0.89      0.90      5000
+    positive       0.90      0.92      0.91      5000
+
+    accuracy                           0.90     10000
+   macro avg       0.90      0.90      0.90     10000
+weighted avg       0.90      0.90      0.90     10000
+
+Confusion matrix:
+ [[4468  532]
+ [ 422 4578]]
+ROC AUC: 0.9648827599999998
+
+Training MultinomialNB...
+
+--- MultinomialNB ---
+Accuracy: 0.8703
+F1 score: 0.8721789691534444
+              precision    recall  f1-score   support
+
+    negative       0.88      0.86      0.87      5000
+    positive       0.86      0.89      0.87      5000
+
+    accuracy                           0.87     10000
+   macro avg       0.87      0.87      0.87     10000
+weighted avg       0.87      0.87      0.87     10000
+
+Confusion matrix:
+ [[4278  722]
+ [ 575 4425]]
+ROC AUC: 0.94161492
+
+Training LinearSVC...
+
+--- LinearSVC ---
+Accuracy: 0.8971
+F1 score: 0.8976017514180515
+              precision    recall  f1-score   support
+
+    negative       0.90      0.89      0.90      5000
+    positive       0.89      0.90      0.90      5000
+
+    accuracy                           0.90     10000
+   macro avg       0.90      0.90      0.90     10000
+weighted avg       0.90      0.90      0.90     10000
+
+Confusion matrix:
+ [[4461  539]
+ [ 490 4510]]
+ROC AUC: 0.96185228
+
+Training SGDClassifier...
+
+--- SGDClassifier ---
+Accuracy: 0.9017
+F1 score: 0.9028560134400633
+              precision    recall  f1-score   support
+
+    negative       0.91      0.89      0.90      5000
+    positive       0.89      0.91      0.90      5000
+
+    accuracy                           0.90     10000
+   macro avg       0.90      0.90      0.90     10000
+weighted avg       0.90      0.90      0.90     10000
+
+Confusion matrix:
+ [[4449  551]
+ [ 432 4568]]
+ROC AUC: 0.9640498399999999
+
+Cross-val accuracy (5-fold) on training data:
+LogReg: mean=0.8945, std=0.0022
+NaiveBayes: mean=0.8694, std=0.0025
+LinearSVC: mean=0.8882, std=0.0041
+SGDClassifier: mean=0.8962, std=0.0024
+
+Cross-val F1 (5-fold) on training data:
+LogReg: mean=0.8958, std=0.0025
+NaiveBayes: mean=0.8707, std=0.0028
+LinearSVC: mean=0.8891, std=0.0042
+SGDClassifier: mean=0.8976, std=0.0025
+
+Running small GridSearchCV for LogisticRegression (cv=3)...
+Fitting 3 folds for each of 4 candidates, totalling 12 fits
+Best LR params: {'clf__C': 1.0} Best CV f1: 0.891057722723484
+
+Running small GridSearchCV for LinearSVC (cv=3)...
+Fitting 3 folds for each of 4 candidates, totalling 12 fits
+Best SVC params: {'clf__C': 0.1} Best CV f1: 0.8918048392558569
+
+--- LogReg_gridbest ---
+Accuracy: 0.9016
+F1 score: 0.9025356576862124
+              precision    recall  f1-score   support
+
+    negative       0.91      0.89      0.90      5000
+    positive       0.89      0.91      0.90      5000
+
+    accuracy                           0.90     10000
+   macro avg       0.90      0.90      0.90     10000
+weighted avg       0.90      0.90      0.90     10000
+
+Confusion matrix:
+ [[4460  540]
+ [ 444 4556]]
+ROC AUC: 0.96315588
+
+--- LinearSVC_gridbest ---
+Accuracy: 0.9018
+F1 score: 0.9028876582278481
+              precision    recall  f1-score   support
+
+    negative       0.91      0.89      0.90      5000
+    positive       0.89      0.91      0.90      5000
+
+    accuracy                           0.90     10000
+   macro avg       0.90      0.90      0.90     10000
+weighted avg       0.90      0.90      0.90     10000
+
+Confusion matrix:
+ [[4453  547]
+ [ 435 4565]]
+ROC AUC: 0.9634785200000001
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
