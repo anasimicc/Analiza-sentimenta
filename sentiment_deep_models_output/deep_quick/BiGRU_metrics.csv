@@ -1,0 +1,14 @@
+metric,value
+accuracy,0.8479
+roc_auc,0.92715404
+precision,0.8347123340388686
+recall,0.8676
+f1_score,0.8508384819064431
+specificity,0.8282
+avg_precision,0.9239538761087294
+ppv,0.8347123340388686
+npv,0.8621694774099521
+true_negatives,4141.0
+false_positives,859.0
+false_negatives,662.0
+true_positives,4338.0

@@ -1,0 +1,100 @@
+EXPERIMENT SUMMARY
+==================
+
+Experiment: deep_quick
+Date: 2026-04-03 14:46:38
+Models Trained: 6
+
+CONFIGURATION:
+--------------
+DATA_PATH           : IMDB Dataset.csv
+OUTPUT_DIR          : ./sentiment_deep_models_output
+CLASSICAL_MODELS_DIR: ./sentiment_student1_output
+MAX_FEATURES        : 5000
+MAX_LEN             : 50
+EMBEDDING_DIM       : 32
+BATCH_SIZE          : 128
+EPOCHS              : 5
+VALIDATION_SPLIT    : 0.2
+RANDOM_STATE        : 42
+USE_GLOVE           : False
+GLOVE_PATH          : None
+
+RESULTS (sorted by ROC AUC):
+-----------------------------
+Model           Accuracy   ROC AUC   
+-----------------------------------
+BiLSTM          0.8471     0.9279    
+LSTM            0.8525     0.9276    
+BiGRU           0.8479     0.9272    
+Transformer     0.8484     0.9267    
+GRU             0.8486     0.9258    
+SimpleRNN       0.5000     0.5030    
+
+BEST MODEL: BiLSTM
+Accuracy: 0.8471
+ROC AUC: 0.9279
+
+FILES GENERATED:
+----------------
+- BiGRU_architecture.txt
+- BiGRU_best.h5
+- BiGRU_config.json
+- BiGRU_metrics.csv
+- BiGRU_metrics.txt
+- BiGRU_model.h5
+- BiLSTM_architecture.txt
+- BiLSTM_best.h5
+- BiLSTM_config.json
+- BiLSTM_metrics.csv
+- BiLSTM_metrics.txt
+- BiLSTM_model.h5
+- GRU_architecture.txt
+- GRU_best.h5
+- GRU_config.json
+- GRU_metrics.csv
+- GRU_metrics.txt
+- GRU_model.h5
+- LSTM_architecture.txt
+- LSTM_best.h5
+- LSTM_config.json
+- LSTM_metrics.csv
+- LSTM_metrics.txt
+- LSTM_model.h5
+- SimpleRNN_architecture.txt
+- SimpleRNN_best.h5
+- SimpleRNN_config.json
+- SimpleRNN_metrics.csv
+- SimpleRNN_metrics.txt
+- SimpleRNN_model.h5
+- Transformer_architecture.txt
+- Transformer_best.h5
+- Transformer_config.json
+- Transformer_metrics.csv
+- Transformer_metrics.txt
+- Transformer_model.h5
+- all_models_comparison.csv
+- classical_vs_deep_comparison.png
+- confusion_matrix_BiGRU.png
+- confusion_matrix_BiLSTM.png
+- confusion_matrix_GRU.png
+- confusion_matrix_LSTM.png
+- confusion_matrix_SimpleRNN.png
+- confusion_matrix_Transformer.png
+- deep_models_comparison.csv
+- deep_models_comparison.png
+- experiment_config.json
+- experiment_config.txt
+- experiment_summary.json
+- roc_curve_BiGRU.png
+- roc_curve_BiLSTM.png
+- roc_curve_GRU.png
+- roc_curve_LSTM.png
+- roc_curve_SimpleRNN.png
+- roc_curve_Transformer.png
+- training_history_BiGRU.png
+- training_history_BiLSTM.png
+- training_history_GRU.png
+- training_history_LSTM.png
+- training_history_SimpleRNN.png
+- training_history_Transformer.png

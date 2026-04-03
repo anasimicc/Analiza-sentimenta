@@ -1,0 +1,27 @@
+EXPERIMENT CONFIGURATION
+========================
+
+Experiment Name: deep_quick
+Timestamp: 2026-04-03 14:42:19
+
+PARAMETERS:
+-----------
+DATA_PATH           : IMDB Dataset.csv
+OUTPUT_DIR          : ./sentiment_deep_models_output
+CLASSICAL_MODELS_DIR: ./sentiment_student1_output
+MAX_FEATURES        : 5000
+MAX_LEN             : 50
+EMBEDDING_DIM       : 32
+BATCH_SIZE          : 128
+EPOCHS              : 5
+VALIDATION_SPLIT    : 0.2
+RANDOM_STATE        : 42
+USE_GLOVE           : False
+GLOVE_PATH          : None
+
+DERIVED SETTINGS:
+-----------------
+Output Directory    : ./sentiment_deep_models_output\deep_quick
+Max Features        : 5000
+Max Sequence Length : 50
+Embedding Dimension : 32

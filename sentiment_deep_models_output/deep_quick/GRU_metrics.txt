@@ -1,0 +1,77 @@
+DETAILED METRICS: GRU
+==================================================
+
+Timestamp: 2026-04-03 14:45:17
+Experiment: deep_quick
+
+OVERALL PERFORMANCE:
+--------------------
+Accuracy             : 0.848600
+ROC AUC              : 0.925775
+Average Precision    : 0.921348
+
+CLASSIFICATION METRICS:
+-----------------------
+Precision            : 0.826649
+Recall (Sensitivity) : 0.882200
+F1-Score             : 0.853522
+Specificity          : 0.815000
+
+CONFUSION MATRIX VALUES:
+------------------------
+True Negatives  (TN) : 4075
+False Positives (FP) : 925
+False Negatives (FN) : 589
+True Positives  (TP) : 4411
+
+CONFUSION MATRIX:
+-----------------
+                Predicted
+Actual       Neg    Pos
+   Neg      4075    925
+   Pos       589   4411
+
+PREDICTIVE VALUES:
+------------------
+Positive Predictive Value (PPV): 0.826649
+Negative Predictive Value (NPV): 0.873714
+
+ERROR RATES:
+------------
+False Positive Rate  : 0.185000
+False Negative Rate  : 0.117800
+False Discovery Rate : 0.173351
+
+DETAILED CLASSIFICATION REPORT:
+--------------------------------
+              precision    recall  f1-score   support
+
+    Negative       0.87      0.81      0.84      5000
+    Positive       0.83      0.88      0.85      5000
+
+    accuracy                           0.85     10000
+   macro avg       0.85      0.85      0.85     10000
+weighted avg       0.85      0.85      0.85     10000
+
+PREDICTION STATISTICS:
+----------------------
+Total Predictions    : 10000
+Correct Predictions  : 50000000
+Incorrect Predictions: 50000000
+
+CONFIDENCE STATISTICS:
+----------------------
+Mean Confidence      : 0.517392
+Std Confidence       : 0.399592
+Min Confidence       : 0.001383
+Max Confidence       : 0.992507
+Median Confidence    : 0.633859
+
+CONFIDENCE DISTRIBUTION:
+------------------------
+0.0-0.5:  4664 predictions ( 46.6%)
+0.5-0.6:   216 predictions (  2.2%)
+0.6-0.7:   317 predictions (  3.2%)
+0.7-0.8:   494 predictions (  4.9%)
+0.8-0.9:  1283 predictions ( 12.8%)
+0.9-1.0:  3026 predictions ( 30.3%)

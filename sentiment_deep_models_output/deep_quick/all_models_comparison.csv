@@ -1,0 +1,13 @@
+model,accuracy,roc_auc,type
+LogReg_baseline,0.9046,0.9648827599999998,Classical ML
+NB,0.8703,0.94161492,Classical ML
+SVC,0.8971,0.96185228,Classical ML
+SGD,0.9017,0.96404984,Classical ML
+LogReg_best,0.9016,0.96315588,Classical ML
+SVC_best,0.9018,0.96347852,Classical ML
+SimpleRNN,0.5,0.50296436,Deep Learning
+LSTM,0.8525,0.9276088800000002,Deep Learning
+BiLSTM,0.8471,0.92787734,Deep Learning
+GRU,0.8486,0.92577508,Deep Learning
+BiGRU,0.8479,0.92715404,Deep Learning
+Transformer,0.8484,0.92672918,Deep Learning

@@ -1,0 +1,51 @@
+{
+  "experiment_name": "deep_quick",
+  "timestamp": "2026-04-03T14:46:38.907279",
+  "configuration": {
+    "DATA_PATH": "IMDB Dataset.csv",
+    "OUTPUT_DIR": "./sentiment_deep_models_output",
+    "CLASSICAL_MODELS_DIR": "./sentiment_student1_output",
+    "MAX_FEATURES": 5000,
+    "MAX_LEN": 50,
+    "EMBEDDING_DIM": 32,
+    "BATCH_SIZE": 128,
+    "EPOCHS": 5,
+    "VALIDATION_SPLIT": 0.2,
+    "RANDOM_STATE": 42,
+    "USE_GLOVE": false,
+    "GLOVE_PATH": null
+  },
+  "models_trained": 6,
+  "results": [
+    {
+      "model_name": "BiLSTM",
+      "accuracy": 0.8471,
+      "roc_auc": 0.92787734
+    },
+    {
+      "model_name": "LSTM",
+      "accuracy": 0.8525,
+      "roc_auc": 0.9276088800000002
+    },
+    {
+      "model_name": "BiGRU",
+      "accuracy": 0.8479,
+      "roc_auc": 0.92715404
+    },
+    {
+      "model_name": "Transformer",
+      "accuracy": 0.8484,
+      "roc_auc": 0.92672918
+    },
+    {
+      "model_name": "GRU",
+      "accuracy": 0.8486,
+      "roc_auc": 0.92577508
+    },
+    {
+      "model_name": "SimpleRNN",
+      "accuracy": 0.5,
+      "roc_auc": 0.50296436
+    }
+  ]
+}
