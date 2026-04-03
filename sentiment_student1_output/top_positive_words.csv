@@ -1,6 +1,7 @@
 word,count
 film,42108
 movie,37853
+not,28303
 like,17714
 good,15025
 just,14109
@@ -8,6 +9,7 @@ great,12964
 story,12935
 time,12751
 really,10740
+no,9235
 people,8719
 love,8691
 best,8510
@@ -17,5 +19,3 @@ films,7601
 think,7208
 characters,7103
 don,7001
-movies,6996
-character,6925

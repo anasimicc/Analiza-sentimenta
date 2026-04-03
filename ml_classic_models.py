@@ -60,7 +60,7 @@ def remove_stopwords_and_short(tokens):
     stopwords = ENGLISH_STOP_WORDS
     return [t for t in tokens if t not in stopwords and len(t) > 1]
 
-# Alternative preprocessing version:
+# Alternative version:
 # keep important negation words because they matter a lot for sentiment
 # examples: "not good", "no fun", "never again"
 def remove_stopwords_and_short_keep_negation(tokens):
@@ -72,10 +72,10 @@ def preprocess_series(series):
     tokenized = cleaned.map(lambda s: s.split())
 
     # Original version:
-    filtered = tokenized.map(remove_stopwords_and_short)
+    # filtered = tokenized.map(remove_stopwords_and_short)
 
     # Alternative version for sentiment tasks:
-    # filtered = tokenized.map(remove_stopwords_and_short_keep_negation)
+    filtered = tokenized.map(remove_stopwords_and_short_keep_negation)
 
     return filtered.map(lambda tokens: " ".join(tokens))
 
@@ -127,7 +127,7 @@ plt.tight_layout()
 plt.savefig(os.path.join(OUTPUT_DIR, "hist_len_clean.png"))
 plt.show()
 
-# Added: average cleaned review length by class
+# Average cleaned review length by class
 avg_len_by_class = df.groupby('sentiment')['review_len_clean'].mean()
 print("\nAverage cleaned review length by class:\n", avg_len_by_class)
 avg_len_by_class.to_csv(os.path.join(OUTPUT_DIR, "avg_review_len_by_class.csv"), header=['avg_review_len_clean'])
@@ -143,7 +143,7 @@ def top_n_words_for_class(df, label, n=25, max_features=5000):
     counts = sums[idx]
     return list(zip(features, counts))
 
-# Added: top bigrams per class
+# Top bigrams per class
 # This is useful for sentiment because phrases such as "very good" and "not worth" carry more meaning.
 def top_n_bigrams_for_class(df, label, n=20, max_features=5000):
     vect = CountVectorizer(max_features=max_features, ngram_range=(2, 2))
@@ -248,8 +248,7 @@ print("\nTraining LinearSVC...")
 pipe_svc.fit(X_train, y_train)
 evaluate(pipe_svc, X_test, y_test, "LinearSVC")
 
-# Added bonus model: SGDClassifier
-# Keep it optional if your professor strictly wants only 3 classical models in the main comparison.
+# Bonus model: SGDClassifier
 pipe_sgd = Pipeline([
     ('tfidf', tfidf),
     ('clf', SGDClassifier(loss='hinge', max_iter=2000, random_state=RANDOM_STATE))
@@ -258,7 +257,7 @@ print("\nTraining SGDClassifier...")
 pipe_sgd.fit(X_train, y_train)
 evaluate(pipe_sgd, X_test, y_test, "SGDClassifier")
 
-# Cross-validation on train set (quick)
+# Cross-validation on train set
 print("\nCross-val accuracy (5-fold) on training data:")
 for name, model in [("LogReg", pipe_lr), ("NaiveBayes", pipe_nb), ("LinearSVC", pipe_svc), ("SGDClassifier", pipe_sgd)]:
     scores = cross_val_score(model, X_train, y_train, cv=5, scoring='accuracy', n_jobs=-1)
@@ -269,16 +268,16 @@ for name, model in [("LogReg", pipe_lr), ("NaiveBayes", pipe_nb), ("LinearSVC", 
     scores = cross_val_score(model, X_train, y_train, cv=5, scoring='f1', n_jobs=-1)
     print(f"{name}: mean={scores.mean():.4f}, std={scores.std():.4f}")
 
-# ---------- Light Grid Search (fast) ----------
-# Use smaller TF-IDF for speed during grid search
+# Light Grid Search 
+# Using smaller TF-IDF for speed during grid search
 # Original version:
 # tfidf_grid = TfidfVectorizer(max_features=10000, ngram_range=(1,2), min_df=5)
 
 # Alternative version to test:
 tfidf_grid = TfidfVectorizer(max_features=10000, ngram_range=(1,2), min_df=2, max_df=0.9, sublinear_tf=True)
 
-pipe_lr_gs = Pipeline([('tfidf', tfidf_grid), ('clf', LogisticRegression(max_iter=1000, solver='liblinear', random_state=RANDOM_STATE))])
-pipe_svc_gs = Pipeline([('tfidf', tfidf_grid), ('clf', LinearSVC(max_iter=2000, random_state=RANDOM_STATE))])
+pipe_lr_gs = Pipeline([('tfidf', tfidf_grid), ('clf', LogisticRegression(max_iter=1000, solver='liblinear', random_state=42))])
+pipe_svc_gs = Pipeline([('tfidf', tfidf_grid), ('clf', LinearSVC(max_iter=2000, random_state=42))])
 
 # Original version:
 # param_grid_lr = {'clf__C': [0.1, 1.0, 5.0]}
@@ -353,7 +352,7 @@ mis_nb = save_misclassified(pipe_nb, X_test, y_test, "NaiveBayes", n=300)
 mis_svc = save_misclassified(pipe_svc, X_test, y_test, "LinearSVC", n=300)
 mis_sgd = save_misclassified(pipe_sgd, X_test, y_test, "SGDClassifier", n=300)
 
-# Added: print a few examples directly in console for quick error inspection
+# Print a few examples directly in console for quick error inspection
 print("\nSample misclassified examples - Logistic Regression:")
 print(mis_lr.head(10))
 
@@ -368,4 +367,3 @@ print(mis_sgd.head(10))
 
 print("\nStudent 1 workflow finished. Artifacts saved in:", OUTPUT_DIR)
 print("Files created (examples):", os.listdir(OUTPUT_DIR)[:20])
-print("Suggested next steps: deeper error analysis, examine sentences in misclassified files, pass artifacts to Student 2 for embedding-based deep models.")
